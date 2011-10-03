@@ -1,7 +1,89 @@
 {% extends "index.html" %}
 
+{%block extrabody %}onload="initBefore(); initAfter();"{% endblock %}
+
+{% block extrahead %}
+    <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+    <script type="text/javascript">
+        var map, layer;
+        var readWKT = function (wkt) {
+            var a = new OpenLayers.Format.WKT();
+            return a.read(wkt);
+        }
+        var options = {
+                projection: new OpenLayers.Projection("EPSG:900913"),
+                displayProjection: new OpenLayers.Projection("EPSG:4326"),
+                units: "m",
+                maxResolution: 156543.0339,
+                numZoomLevels: 5,
+                controls: [],
+                maxExtent: new OpenLayers.Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34)
+        };
+        var styleMap = new OpenLayers.StyleMap({ 'default': {
+            strokeColor: '#e5e5e5',
+            strokeWidth: 1,
+            strokeOpacity: 1,
+            fillOpacity: 1,
+            fillColor: '#000000'
+        }});
+        {% include "2000.json" %}
+        {% include "2010.json" %}
+        
+        /* the before map */
+        function initBefore(){
+            beforemap = new OpenLayers.Map('beforemap', options);
+            base = new OpenLayers.Layer("", { isBaseLayer: true });
+            beforemap.addLayer(base);
+            beforemap.setCenter(
+                new OpenLayers.LonLat(-95.537, 37.25).transform(
+                    new OpenLayers.Projection("EPSG:4326"),
+                    beforemap.getProjectionObject()
+                ), 3
+            );
+            var beforeFeatures = new OpenLayers.Layer.Vector("States",
+                {'styleMap': styleMap, isBaseLayer: false});
+            $.each(beforeData, function(i) {
+                var state = beforeData[i];
+                var feature = readWKT(state.circle)
+                feature.data = { 'name': state.name }
+                beforeFeatures.addFeatures([feature]);
+            });
+            beforemap.addLayer(beforeFeatures);
+        }
+        
+        /* The after map */
+        function initAfter(){
+            aftermap = new OpenLayers.Map('aftermap', options);
+            base = new OpenLayers.Layer("", { isBaseLayer: true });
+            aftermap.addLayer(base);
+            aftermap.setCenter(
+                new OpenLayers.LonLat(-95.537, 36.9).transform(
+                    new OpenLayers.Projection("EPSG:4326"),
+                    aftermap.getProjectionObject()
+                ), 3
+            );
+            var afterFeatures = new OpenLayers.Layer.Vector("States",
+                {'styleMap': styleMap, isBaseLayer: false});
+            $.each(afterData, function(i) {
+                var state = afterData[i];
+                var feature = readWKT(state.circle)
+                feature.data = { 'name': state.name }
+                afterFeatures.addFeatures([feature]);
+            });
+            aftermap.addLayer(afterFeatures);
+        }
+    </script>
+{% endblock %}
+
 {% block content %}
-
-    Hello LA
-
+    <div class="row">
+        <div class="sixcol">
+            <div id="beforemap" style="width:100%; height:250px;"></div>
+            <div style="text-align:center; font-weight:bold;">2000</div>
+        </div>
+        <div class="sixcol last">
+            <div id="aftermap" style="width:100%; height:250px;"></div>
+            <div style="text-align:center; font-weight:bold;">2010</div>
+        </div>
+    </div>
 {% endblock %}
