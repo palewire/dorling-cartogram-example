@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    {% block extrarss %}
+    {% endblock %}
+    
+    {% block extralinktags %}
+    {% endblock %}
+    
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}reset-fonts-grids.css"/>
+    <link rel="stylesheet" href="{{ MEDIA_URL }}styles.css" type="text/css" media="screen" />
+    
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.3/jquery.min.js"></script>
+
+    <script type="text/javascript"> 
+    //<![CDATA[
+    $(document).ready(function(){
+        $(".smalliconwrapper").hover(
+            function() {
+                $(".smalliconlabel", $(this)).show();
+            },
+            function () {
+                $(".smalliconlabel", $(this)).hide();
+            }
+        );
+        {% block extradocready %}
+        {% endblock %}
+    });
+    //]]>
+    </script>
+    {% block extrahead %}
+    {% endblock %}
+    
+</head>
+<body {%block extrabody %}{% endblock %}>
+    
+    <div id="container" class="container">
+        <div id="hd" class="row">
+            <div class="ninecol">
+                <h1>
+                    <a href="/" title="" id="shingle">
+                        palewire
+                    </a>
+                </h1>
+            </div>
+            <div class="threecol last" id="whois">
+                <h2>
+                    <a href="/who-is-ben-welsh/" title="All about Ben">Who is Ben Welsh?</a>
+                </h2>
+            </div>
+        </div>
+            
+        <div id="topbar" class="row">
+            <div class="twelvecol last"></div>
+        </div>
+        <div id="navbar" class="row">
+            <div class="ninecol"></div>
+            <div class="threecol last">
+                <div class="smalliconwrapper">
+                    <a href="" title="Apps">
+                        <img src="{{ MEDIA_URL }}icons/apps.gif" width="30" alt="apps" />
+                    </a>
+                    <div class="smalliconlabel">Apps</div>
+                </div>
+                <div class="smalliconwrapper">
+                    <a href="" title="Clips">
+                        <img src="{{ MEDIA_URL }}icons/clips.png" width="30" alt="clips" />
+                    </a>
+                    <div class="smalliconlabel">Clips</div>
+                </div>
+                <div class="smalliconwrapper">
+                    <a href="" title="Posts">
+                        <img src="{{ MEDIA_URL }}icons/posts.gif" width="30" alt="posts" />
+                    </a>
+                    <div class="smalliconlabel">Posts</div>
+                </div>
+                <div class="smalliconwrapper">
+                    <a href="" title="Ticker">
+                        <img src="{{ MEDIA_URL }}icons/ticker.gif" width="30" alt="ticker" />
+                    </a>
+                    <div class="smalliconlabel">Ticker</div>
+                </div>
+            </div>
+        </div>
+            
+        <div id="bd" class="row">
+            {% block content %}
+            {% endblock %}
+        </div>
+            
+        <div id="ft" class="row">
+            <div class="twelvecol last">
+            </div>
+        </div>
+        
+    </div>
+
+
+</body>
+</html>
