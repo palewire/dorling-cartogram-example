@@ -9,7 +9,18 @@
         var readWKT = function (wkt) {
             var a = new OpenLayers.Format.WKT();
             return a.read(wkt);
-        }
+        };
+        var addCommas = function(nStr) {
+            nStr += '';
+            x = nStr.split('.');
+            x1 = x[0];
+            x2 = x.length > 1 ? '.' + x[1] : '';
+            var rgx = /(\d+)(\d{3})/;
+            while (rgx.test(x1)) {
+                x1 = x1.replace(rgx, '$1' + ',' + '$2');
+            }
+            return x1 + x2;
+        };
         var options = {
                 projection: new OpenLayers.Projection("EPSG:900913"),
                 displayProjection: new OpenLayers.Projection("EPSG:4326"),
@@ -19,14 +30,26 @@
                 controls: [],
                 maxExtent: new OpenLayers.Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34)
         };
-        var styleMap = new OpenLayers.StyleMap({ 'default': {
+        var defaultStyle = new OpenLayers.Style({
             strokeColor: '#e5e5e5',
             strokeWidth: 1,
             strokeOpacity: 1,
             fillOpacity: 1,
             fillColor: '#000000'
-        }});
-        {% include "2000.json" %}
+        });
+        var highlightStyle = new OpenLayers.Style({
+            strokeColor: '#e5e5e5',
+            strokeWidth: 1,
+            strokeOpacity: 1,
+            fillOpacity: 1,
+            fillColor: '#cccccc'
+        });
+        var styleMap = new OpenLayers.StyleMap({
+            default: defaultStyle,
+            temporary: highlightStyle
+        });
+        
+        {% include "1910.json" %}
         {% include "2010.json" %}
         
         /* the before map */
@@ -35,7 +58,7 @@
             base = new OpenLayers.Layer("", { isBaseLayer: true });
             beforemap.addLayer(base);
             beforemap.setCenter(
-                new OpenLayers.LonLat(-95.537, 37.25).transform(
+                new OpenLayers.LonLat(-95.537, 41).transform(
                     new OpenLayers.Projection("EPSG:4326"),
                     beforemap.getProjectionObject()
                 ), 3
@@ -45,10 +68,28 @@
             $.each(beforeData, function(i) {
                 var state = beforeData[i];
                 var feature = readWKT(state.circle)
-                feature.data = { 'name': state.name }
+                feature.data = { name: state.name, population: state.population }
                 beforeFeatures.addFeatures([feature]);
             });
             beforemap.addLayer(beforeFeatures);
+            var beforeHighlight = function (event) {
+                var label = event.feature.data.name + ": " + addCommas(event.feature.data.population);
+                $("#beforelabel").text(label);
+            };
+            var beforeUnhighlight = function(event) {
+                $("#beforelabel").text("1910");
+            }
+            var highlightControl = new OpenLayers.Control.SelectFeature(beforeFeatures, {
+                hover: true,
+                highlightOnly: true,
+                renderIntent: "temporary",
+                eventListeners: {
+                    featurehighlighted: beforeHighlight,
+                    featureunhighlighted: beforeUnhighlight
+                }
+            })
+            beforemap.addControl(highlightControl);
+            highlightControl.activate();
         }
         
         /* The after map */
@@ -67,23 +108,45 @@
             $.each(afterData, function(i) {
                 var state = afterData[i];
                 var feature = readWKT(state.circle)
-                feature.data = { 'name': state.name }
+                feature.data = { name: state.name, population: state.population }
                 afterFeatures.addFeatures([feature]);
             });
             aftermap.addLayer(afterFeatures);
+            var afterHighlight = function (event) {
+                var label = event.feature.data.name + ": " + addCommas(event.feature.data.population);
+                $("#afterlabel").text(label);
+            };
+            var afterUnhighlight = function(event) {
+                $("#afterlabel").text("2010");
+            }
+            var highlightControl = new OpenLayers.Control.SelectFeature(afterFeatures, {
+                hover: true,
+                highlightOnly: true,
+                renderIntent: "temporary",
+                eventListeners: {
+                    featurehighlighted: afterHighlight,
+                    featureunhighlighted: afterUnhighlight
+                }
+            })
+            aftermap.addControl(highlightControl);
+            highlightControl.activate();
         }
     </script>
 {% endblock %}
 
 {% block content %}
+    <style type="text/css">
+    #beforelabel {text-align:center; font-weight:bold;}
+    #afterlabel {text-align:center; font-weight:bold;}
+    </style>
     <div class="row">
         <div class="sixcol">
             <div id="beforemap" style="width:100%; height:250px;"></div>
-            <div style="text-align:center; font-weight:bold;">2000</div>
+            <div id="beforelabel">1910</div>
         </div>
         <div class="sixcol last">
             <div id="aftermap" style="width:100%; height:250px;"></div>
-            <div style="text-align:center; font-weight:bold;">2010</div>
+            <div id="afterlabel">2010</div>
         </div>
     </div>
 {% endblock %}

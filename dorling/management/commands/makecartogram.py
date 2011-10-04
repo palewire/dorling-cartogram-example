@@ -21,7 +21,8 @@ class Command(BaseCommand):
             obj_list,
             'population',
             'polygon_900913', 
-            iterations=500
+            iterations=500,
+            scale=227.141374154
         )
         cartogram.make()
         data = [{
